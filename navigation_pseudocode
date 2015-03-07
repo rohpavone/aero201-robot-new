@@ -1,0 +1,24 @@
+navigation pseudocode
+
+// calculate path using Hamiltonian distances
+tile_distance = const
+x = target.x - current.x
+y = target.y - current.y
+
+tiles_x = x//const
+extra_x = x % const
+
+tiles_y = y//const
+extra_y = y % const
+
+// rotate towards correct direction
+
+// once path is found, time to travel
+line_interrupter = 0
+line_ISR_en = 1 // enable the ISR for the line counter
+timeout_ISR_en = 1
+timer_timeout = tiles_x * drivespeed *3/2
+while(!timeout and line_interrupts != tiles_x)
+  drive() // when timeout occurs, line_interrupter will increase
+
+// rotate towards correct direction
