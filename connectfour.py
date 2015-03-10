@@ -55,7 +55,7 @@ class Board:
             print('')
 
     def play(self, colour, row):
-        if colour == self.turn:
+        if colour == self.turn and row in rows:
             if(self.playable[row] != 'NONE'):
                 self.pieces[self.playable[row]] = colour
                 if(self.playable[row][-1] != '6'):
@@ -69,7 +69,9 @@ class Board:
                     if debug:
                         print('Not playable anymore')
                     self.playable[row] = 'NONE'
-                    return 'FAIL'
+                    self.next_turn()
+                    return 'SUCCESS'
+                
         return 'FAIL'
 
     def cont(self):
@@ -161,23 +163,23 @@ class Board:
             parts.append(BLANK)
 
         win = 0
+        if coord in coordinates:
+            location = coordinates.index(coord)
+            # north east direction
+            parts = self.north_east(location)
+            win += self.identical(parts)
 
-        location = coordinates.index(coord)
-        # north east direction
-        parts = self.north_east(location)
-        win += self.identical(parts)
+            # north west direction
+            parts = self.north_west(location)
+            win += self.identical(parts)
 
-        # north west direction
-        parts = self.north_west(location)
-        win += self.identical(parts)
+            # south east direction
+            parts = self.south_east(location)
+            win += self.identical(parts)
 
-        # south east direction
-        parts = self.south_east(location)
-        win += self.identical(parts)
-
-        # south west direction
-        parts = self.south_west(location)
-        win += self.identical(parts)
+            # south west direction
+            parts = self.south_west(location)
+            win += self.identical(parts)
 
         return win
 
@@ -188,13 +190,14 @@ class Board:
 
         win = 0
 
-        # east
-        location = coordinates.index(coord)
-        win += self.identical(parts)
+        if coord in coordinates:
+            # east
+            location = coordinates.index(coord)
+            win += self.identical(parts)
 
-        # west
-        parts = self.west(location)
-        win += self.identical(parts)
+            # west
+            parts = self.west(location)
+            win += self.identical(parts)
 
         return win
 
@@ -205,14 +208,15 @@ class Board:
 
         win = 0
 
-        # north
-        location = coordinates.index(coord)
-        parts = self.north(location)
-        win += self.identical(parts)
+        if coord in coordinates:
+            # north
+            location = coordinates.index(coord)
+            parts = self.north(location)
+            win += self.identical(parts)
 
-        # south
-        parts = self.south(location)
-        win += self.identical(parts)
+            # south
+            parts = self.south(location)
+            win += self.identical(parts)
 
         return win
 
@@ -251,68 +255,105 @@ class Player:
         # plies)
         parts = [0,0,0,0]
         state_val = 0
-        print('')
-        location = coordinates.index(coord)
-        # north
-        parts = board.north(location)
-        print(board.state(parts, self.color))
-        state_val += board.state(parts, self.color)
+        max_coords = len(coordinates) - 1
+        min_coords = 0
+        if coord in coordinates:
+            location = coordinates.index(coord)
+            # north
+            parts = board.north(location)
+            state_val += board.state(parts, self.color)
 
-        # south
-        parts = board.south(location)
-        print(board.state(parts, self.color))
-        state_val += board.state(parts, self.color)
+            # south
+            parts = board.south(location)
+            state_val += board.state(parts, self.color)
 
-        # east
-        parts = board.east(location)
-        print(board.state(parts, self.color))
-        state_val += board.state(parts, self.color)
+            # east
+            parts = board.east(location)
+            state_val += board.state(parts, self.color)
 
-        # west
-        parts = board.west(location)
-        print(board.state(parts, self.color))
-        state_val += board.state(parts, self.color)
+            # west
+            parts = board.west(location)
+            state_val += board.state(parts, self.color)
 
-        # north east
-        parts = board.north_east(location)
-        print(board.state(parts, self.color))
-        state_val += board.state(parts, self.color)
+            # north east
+            parts = board.north_east(location)
+            state_val += board.state(parts, self.color)
 
-        # south east
-        parts = board.south_east(location)
-        print(board.state(parts, self.color))
-        state_val += board.state(parts, self.color)
+            # south east
+            parts = board.south_east(location)
+            state_val += board.state(parts, self.color)
 
-        # south west
-        parts = board.south_west(location)
-        print(board.state(parts, self.color))
-        state_val += board.state(parts, self.color)
+            # south west
+            parts = board.south_west(location)
+            state_val += board.state(parts, self.color)
 
-        # north west
-        parts = board.north_west(location)
-        print(board.state(parts, self.color))
-        state_val += board.state(parts, self.color)
+            # north west
+            parts = board.north_west(location)
+            state_val += board.state(parts, self.color)
+
+            # check the middle, in between parts here
+            if location + 6 <= max_coords:
+                parts = board.west(location + 6)
+                state_val += board.state(parts, self.color)
+            if location + 7 <= max_coords:
+                parts = board.south_west(location + 7)
+                state_val += board.state(parts, self.color)
+            if location + 5 <= max_coords:
+                parts = board.north_west(location +5)
+                state_val += board.state(parts, self.color)
+            if location + 1 <= max_coords:
+                parts = board.south(location + 1)
+                state_val += board.state(parts, self.color)
+            if location - 1 >= min_coords:
+                parts = board.north(location -1)
+                state_val += board.state(parts, self.color)
+            if location - 5 >= min_coords:
+                parts = board.south_east(location - 5)
+                state_val += board.state(parts, self.color)
+            if location -6 >= min_coords:
+                parts = board.east(location -6)
+                state_val += board.state(parts, self.color)
+            if location - 7 >= min_coords:
+                parts = board.north_east(location -7)
+                state_val += board.state(parts, self.color)
 
         return state_val
 
-def start():
-    files = open('moves.txt', 'r')
-    moves = []
-    for line in files.readlines():
-        moves.append(line.strip('\n'))
 
+if __name__ == "__main__":
     # initialize board:
-    my_board = Board()
     white_player = Player(WHITE, 1) # white player, 1 ply
     black_player = Player(BLACK, 1) # black player, 1 ply
-
-    # test if overflow occurs
-#    for m in moves:
-#        sup = my_board.play(my_board.turn, m)
-
-    # show the board to see if moves can be seen
+    input_string = ""
+    my_board = Board()
+    utilities = []
     my_board.display()
-    for i in coordinates:
-        print("{0}: {1}".format(i,black_player.utility(i, my_board)))
+    while input_string != "STOP" and my_board.playable: # board should be playable and not stop
+        utilities = []
+        if my_board.turn == WHITE: # player
+            input_string = "" # force it to go through loop first
+            while not input_string in list(my_board.playable.values()):
+                input_string = input("Enter a row to play: ")
+                if not input_string in list(my_board.playable.values()):
+                    print("Invalid - row not playable")
 
-start()
+            # play it now
+            my_board.play(WHITE, input_string[0])
+            my_board.display() #show the game board
+        # black turn now
+        else:
+            # no input turn here, just let black play
+            for value in list(my_board.playable.values()):
+                utilities.append(black_player.utility(value, my_board))
+
+            print(utilities)
+            print(list(my_board.playable.values()))
+            play_me = list(my_board.playable.values())[utilities.index(max(utilities))]
+            my_board.play(BLACK, play_me[0])
+            my_board.display() #show the game board
+            
+                                 
+
+            
+            
+
