@@ -1,8 +1,13 @@
 #include <Servo.h>
 
+#define RED 7
+#define GREEN 5
+#define YELLOW 3
+
+
 Servo myServo;
 int servoPin = 7;
-int sensorPins[] = {A0, A1,A2, A3,A4,A5,A6};
+int sensorPins[] = {A9, A10,A11, A12,A13,A14,A15};
 
 // board values
 int WHITE = 1;
@@ -18,7 +23,7 @@ int blank_value = 900;
 int white_value = 20; 
 
 // number of samples before it is examined
-int sample_number = 20;
+int sample_number = 1;
 
 
 // seven blank values to read the analog pins
@@ -39,7 +44,7 @@ void setup(){
      board[i] = BLANK; 
   }
   
-  myServo.attach(servoPin);
+  //myServo.attach(servoPin);
   Serial.begin(9600);
 }
 
@@ -50,10 +55,11 @@ void loop(){
      sensorValues[i] = 0; 
   }
   
+  int average = 0;
+  
   // check all the rows
-  for(int i = 0; i < 6; i ++)
-  {
-      myServo.write(heights[i]);
+
+     // myServo.write(heights[i]);
       // read the rows now
       for(int k = 0; k < sample_number; k++)
       {
@@ -64,12 +70,14 @@ void loop(){
       }
       for(int j = 0; j < 7; j++){
         sensorValues[j] /= sample_number; // get the average of the sensor values
-        check_values(sensorValues[j], i, j);
+        average += sensorValues[j];
+        //check_values(sensorValues[j], i, j);
+        Serial.print(String(j) + ". " + String(sensorValues[j]) + ", ");
       }
-  }
+      Serial.println("");
 }
 
-void check_values(int value, int row, int column)
+void check_values(int value, int row, int column, int average)
 {
   int array[]={0,0,0};
   int mini = 5000;
@@ -97,5 +105,30 @@ void check_values(int value, int row, int column)
       board[7*row + column] = WHITE;
       break;
  }
+ write_led(index);
   
+}
+
+void write_led(int mode){
+   switch(mode)
+  {
+   case 0:
+     // black
+      digitalWrite(RED, HIGH);
+      digitalWrite(GREEN, LOW);
+      digitalWrite(YELLOW, LOW);
+     break;
+   case 1:
+      // blank
+      digitalWrite(RED, LOW);
+      digitalWrite(GREEN, LOW);
+      digitalWrite(YELLOW, HIGH);
+     break;
+   case 2:
+     // white
+      digitalWrite(RED, LOW);
+      digitalWrite(GREEN, HIGH);
+      digitalWrite(YELLOW, LOW);
+     break;
+  } 
 }
